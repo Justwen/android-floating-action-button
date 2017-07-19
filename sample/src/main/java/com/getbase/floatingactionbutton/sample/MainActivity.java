@@ -26,10 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
         FloatingActionButton button = (FloatingActionButton) findViewById(R.id.setter);
         button.setSize(FloatingActionButton.SIZE_MINI);
-        button.setColorNormalResId(R.color.pink);
-        button.setColorPressedResId(R.color.pink_pressed);
         button.setIcon(R.drawable.ic_fab_star);
-        button.setStrokeVisible(false);
 
         final View actionB = findViewById(R.id.action_b);
 
