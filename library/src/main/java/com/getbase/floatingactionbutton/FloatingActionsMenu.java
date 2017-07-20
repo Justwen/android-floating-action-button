@@ -37,31 +37,49 @@ public class FloatingActionsMenu extends ViewGroup {
     private static final float COLLAPSED_PLUS_ROTATION = 0f;
     private static final float EXPANDED_PLUS_ROTATION = 90f + 45f;
 
-    private int mAddButtonSize;
-    private boolean mAddButtonStrokeVisible;
     private int mExpandDirection;
 
     private int mButtonSpacing;
+
     private int mLabelsMargin;
-    private int mLabelsVerticalOffset;
 
     private boolean mExpanded;
 
     private AnimatorSet mExpandAnimation = new AnimatorSet().setDuration(ANIMATION_DURATION);
+
     private AnimatorSet mCollapseAnimation = new AnimatorSet().setDuration(ANIMATION_DURATION);
+
     private FloatingActionButton mAddButton;
+
     private RotatingDrawable mRotatingDrawable;
+
     private int mMaxButtonWidth;
+
     private int mMaxButtonHeight;
+
     private int mLabelsStyle;
+
     private int mLabelsPosition;
+
     private int mButtonsCount;
+
+    private int mAddDrawable;
+
+    private int mPaddingBottom;
+
+    private int mPaddingRight;
+
+    private int mPaddingLeft;
+
+    private int mPaddingTop;
+
 
     private TouchDelegateGroup mTouchDelegateGroup;
 
     private OnFloatingActionsMenuUpdateListener mListener;
 
     public interface OnFloatingActionsMenuUpdateListener {
+
         void onMenuExpanded();
 
         void onMenuCollapsed();
@@ -82,19 +100,21 @@ public class FloatingActionsMenu extends ViewGroup {
     }
 
     private void init(Context context, AttributeSet attributeSet) {
-        mButtonSpacing = (int) (getResources().getDimension(R.dimen.fab_actions_spacing) - getResources().getDimension(R.dimen.fab_shadow_radius) - getResources().getDimension(R.dimen.fab_shadow_offset));
+        mButtonSpacing = (int) (getResources().getDimension(R.dimen.fab_actions_spacing));
         mLabelsMargin = getResources().getDimensionPixelSize(R.dimen.fab_labels_margin);
-        mLabelsVerticalOffset = getResources().getDimensionPixelSize(R.dimen.fab_shadow_offset);
 
         mTouchDelegateGroup = new TouchDelegateGroup(this);
         setTouchDelegate(mTouchDelegateGroup);
 
         TypedArray attr = context.obtainStyledAttributes(attributeSet, R.styleable.FloatingActionsMenu, 0, 0);
-        mAddButtonSize = attr.getInt(R.styleable.FloatingActionsMenu_fab_addButtonSize, FloatingActionButton.SIZE_NORMAL);
-        mAddButtonStrokeVisible = attr.getBoolean(R.styleable.FloatingActionsMenu_fab_addButtonStrokeVisible, true);
         mExpandDirection = attr.getInt(R.styleable.FloatingActionsMenu_fab_expandDirection, EXPAND_UP);
         mLabelsStyle = attr.getResourceId(R.styleable.FloatingActionsMenu_fab_labelStyle, 0);
         mLabelsPosition = attr.getInt(R.styleable.FloatingActionsMenu_fab_labelsPosition, LABELS_ON_LEFT_SIDE);
+        mAddDrawable = attr.getResourceId(R.styleable.FloatingActionButton_fab_icon,R.drawable.ic_add_black_24dp);
+        mPaddingRight = getResources().getDimensionPixelSize(attr.getResourceId(R.styleable.FloatingActionsMenu_fab_paddingRight,R.dimen.fab_actions_spacing));
+        mPaddingLeft = getResources().getDimensionPixelSize(attr.getResourceId(R.styleable.FloatingActionsMenu_fab_paddingLeft,R.dimen.fab_actions_spacing));
+        mPaddingTop = getResources().getDimensionPixelSize(attr.getResourceId(R.styleable.FloatingActionsMenu_fab_paddingTop,R.dimen.fab_actions_spacing));
+        mPaddingBottom = getResources().getDimensionPixelSize(attr.getResourceId(R.styleable.FloatingActionsMenu_fab_paddingBottom,R.dimen.fab_actions_spacing));
         attr.recycle();
 
         if (mLabelsStyle != 0 && expandsHorizontally()) {
@@ -139,8 +159,8 @@ public class FloatingActionsMenu extends ViewGroup {
         }
     }
 
-    Drawable getIconDrawable() {
-        final RotatingDrawable rotatingDrawable = new RotatingDrawable(ContextCompat.getDrawable(getContext(),R.drawable.ic_add_black_24dp));
+    private Drawable getIconDrawable() {
+        final RotatingDrawable rotatingDrawable = new RotatingDrawable(ContextCompat.getDrawable(getContext(),mAddDrawable));
         mRotatingDrawable = rotatingDrawable;
 
         final OvershootInterpolator interpolator = new OvershootInterpolator();
@@ -163,7 +183,6 @@ public class FloatingActionsMenu extends ViewGroup {
         mAddButton.setImageDrawable(getIconDrawable());
 
         mAddButton.setId(R.id.fab_expand_menu_button);
-        mAddButton.setSize(mAddButtonSize);
         mAddButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -231,9 +250,9 @@ public class FloatingActionsMenu extends ViewGroup {
         }
 
         if (!expandsHorizontally()) {
-            width = mMaxButtonWidth + (maxLabelWidth > 0 ? maxLabelWidth + mLabelsMargin : 0);
+            width = mMaxButtonWidth + (maxLabelWidth > 0 ? maxLabelWidth + mLabelsMargin : 0) + mPaddingRight + mPaddingLeft;
         } else {
-            height = mMaxButtonHeight;
+            height = mMaxButtonHeight + mPaddingTop + mPaddingBottom;
         }
 
         switch (mExpandDirection) {
@@ -267,11 +286,11 @@ public class FloatingActionsMenu extends ViewGroup {
                     mTouchDelegateGroup.clearTouchDelegates();
                 }
 
-                int addButtonY = expandUp ? b - t - mAddButton.getMeasuredHeight() : 0;
+                int addButtonY = expandUp ? b - t - mAddButton.getMeasuredHeight() - mPaddingBottom : mPaddingTop;
                 // Ensure mAddButton is centered on the line where the buttons should be
                 int buttonsHorizontalCenter = mLabelsPosition == LABELS_ON_LEFT_SIDE
-                        ? r - l - mMaxButtonWidth / 2
-                        : mMaxButtonWidth / 2;
+                        ? r - l - mMaxButtonWidth / 2 - mPaddingRight
+                        : mMaxButtonWidth / 2 + mPaddingLeft;
                 int addButtonLeft = buttonsHorizontalCenter - mAddButton.getMeasuredWidth() / 2;
                 mAddButton.layout(addButtonLeft, addButtonY, addButtonLeft + mAddButton.getMeasuredWidth(), addButtonY + mAddButton.getMeasuredHeight());
 
@@ -318,7 +337,7 @@ public class FloatingActionsMenu extends ViewGroup {
                                 ? labelsXNearButton
                                 : labelXAwayFromButton;
 
-                        int labelTop = childY - mLabelsVerticalOffset + (child.getMeasuredHeight() - label.getMeasuredHeight()) / 2;
+                        int labelTop = childY  + (child.getMeasuredHeight() - label.getMeasuredHeight()) / 2;
 
                         label.layout(labelLeft, labelTop, labelRight, labelTop + label.getMeasuredHeight());
 

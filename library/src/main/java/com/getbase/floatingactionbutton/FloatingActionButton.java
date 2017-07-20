@@ -27,7 +27,6 @@ public class FloatingActionButton extends android.support.design.widget.Floating
 
     void init(Context context, AttributeSet attributeSet) {
         TypedArray attr = context.obtainStyledAttributes(attributeSet, R.styleable.FloatingActionButton, 0, 0);
-      //  mIcon = attr.getResourceId(R.styleable.FloatingActionButton_fab_icon, 0);
         mTitle = attr.getString(R.styleable.FloatingActionButton_fab_title);
         attr.recycle();
 
